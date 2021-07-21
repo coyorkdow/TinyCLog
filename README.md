@@ -9,7 +9,7 @@ A header only C language logging library.
 2021-07-21 21:47:18	example.c:main:8	FATAL	this is a fatal #5
 ```
 
-## How to Use
+## Usage
 Copy `log_posix.h` to your project directory.
 ```c
 #include "log_posix.h"
@@ -26,12 +26,12 @@ int main(void) {
 ```
 
 ## Build
-1. Compile `log_posix.h` while the macro `TINY_C_LOG_LOG_IMPL` is defined. `USER_LOGFILE_LOCATION` and `USER_LOG_LEVEL` are optional.
+1. Compile `log_posix.h` while the macro `TINY_C_LOG_POSIX_IMPL` is defined. `USER_LOGFILE_LOCATION` and `USER_LOG_LEVEL` are optional.
 ```
-gcc -DTINY_C_LOG_LOG_IMPL -DUSER_LOGFILE_DIR=\"example.log\" -DUSER_LOG_LEVEL=DEBUG -c log_posix.h
+gcc -DTINY_C_LOG_POSIX_IMPL -DUSER_LOGFILE_DIR=\"example.log\" -DUSER_LOG_LEVEL=DEBUG -c log_posix.h
 ```
 
-2. Compile the other source files. Make sure that `TINY_C_LOG_LOG_IMPL` is **not defined**.
+2. Compile the other source files. Make sure that `TINY_C_LOG_POSIX_IMPL` is **not defined**.
 ```
 gcc -c example.c
 ```
