@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/fcntl.h>
+#include <time.h>
 #include <unistd.h>
 
 enum LogLevel {
@@ -15,21 +16,18 @@ enum LogLevel {
   DISABLE = 100
 };
 
-extern int log_fd;
-
 extern const enum LogLevel log_level;
 
-void init_log_file();
+extern char formatted_time[64];
 
 void DoLog(const char *format, ...);
 
-#define _LOG(level, format, ...)                                        \
-  do {                                                                  \
-    if (log_fd == -1) init_log_file();                                  \
-    if (level >= log_level) {                                           \
-      DoLog("[%s:%s:%d]\t" #level "\t" format "\n", __FILE__, __func__, \
-            __LINE__, ##__VA_ARGS__);                                   \
-    }                                                                   \
+#define _LOG(level, format, ...)                                      \
+  do {                                                                \
+    if (level >= log_level) {                                         \
+      DoLog("%s\t%s:%s:%d\t" #level "\t" format "\n", formatted_time, \
+            __FILE__, __func__, __LINE__, ##__VA_ARGS__);             \
+    }                                                                 \
   } while (0)
 
 #define LOG_DEBUG(format, ...) _LOG(DEBUG, format, ##__VA_ARGS__)
@@ -48,7 +46,9 @@ const enum LogLevel log_level = USER_LOG_LEVEL;
 const enum LogLevel log_level = INFO;
 #endif  // USER_LOG_LEVEL
 
-void init_log_file() {
+char formatted_time[64];
+
+void InitLogFile() {
 #ifdef USER_LOGFILE_DIR
   log_fd =
       open(USER_LOGFILE_DIR, O_APPEND | O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
@@ -59,6 +59,11 @@ void init_log_file() {
 
 void DoLog(const char *format, ...) {
   char buffer[BUFSIZ];
+  if (log_fd == -1) InitLogFile();
+  time_t t = time(NULL);
+  struct tm *fulltime = localtime(&t);
+  formatted_time[strftime(formatted_time, sizeof(formatted_time),
+                          "%Y-%m-%d %H:%M:%S", fulltime)] = '\0';
   va_list args;
   va_start(args, format);
   int n = vsnprintf(buffer, BUFSIZ, format, args);
