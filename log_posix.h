@@ -1,12 +1,12 @@
 #ifndef TINY_C_LOG_POSIX__
 #define TINY_C_LOG_POSIX__
 
+#include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <time.h>
 #include <unistd.h>
-#include <pthread.h>
 
 enum LogLevel {
   DEBUG = 0,
@@ -71,8 +71,8 @@ void UpdateFile(int year, int mon, int day, int hour) {
 void DoLog(const char *format, ...) {
   char buffer[BUFSIZ];
   time_t t = time(NULL);
-  struct tm *fulltime = localtime(&t);
   pthread_mutex_lock(&mutex);
+  struct tm *fulltime = localtime(&t);
   UpdateFile(fulltime->tm_year + 1900, fulltime->tm_mon + 1, fulltime->tm_mday,
              fulltime->tm_hour);
   formatted_time[strftime(formatted_time, sizeof(formatted_time),
@@ -82,7 +82,7 @@ void DoLog(const char *format, ...) {
   int n = vsnprintf(buffer, BUFSIZ, format, args);
   va_end(args);
   write(log_fd, buffer, n);
-   pthread_mutex_unlock(&mutex);
+  pthread_mutex_unlock(&mutex);
 }
 
 #endif  // TINY_C_LOG_POSIX_IMPL
