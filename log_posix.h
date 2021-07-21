@@ -6,6 +6,7 @@
 #include <sys/fcntl.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 
 enum LogLevel {
   DEBUG = 0,
@@ -38,6 +39,8 @@ void DoLog(const char *format, ...);
 
 #ifdef TINY_C_LOG_POSIX_IMPL
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 int log_fd = -1;
 
 #ifdef USER_LOG_LEVEL
@@ -69,6 +72,7 @@ void DoLog(const char *format, ...) {
   char buffer[BUFSIZ];
   time_t t = time(NULL);
   struct tm *fulltime = localtime(&t);
+  pthread_mutex_lock(&mutex);
   UpdateFile(fulltime->tm_year + 1900, fulltime->tm_mon + 1, fulltime->tm_mday,
              fulltime->tm_hour);
   formatted_time[strftime(formatted_time, sizeof(formatted_time),
@@ -78,6 +82,7 @@ void DoLog(const char *format, ...) {
   int n = vsnprintf(buffer, BUFSIZ, format, args);
   va_end(args);
   write(log_fd, buffer, n);
+   pthread_mutex_unlock(&mutex);
 }
 
 #endif  // TINY_C_LOG_POSIX_IMPL
