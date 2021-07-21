@@ -1,5 +1,5 @@
-#ifndef TINY_C_LOG_LOG__
-#define TINY_C_LOG_LOG__
+#ifndef TINY_C_LOG_POSIX__
+#define TINY_C_LOG_POSIX__
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -36,7 +36,7 @@ void DoLog(const char *format, ...);
 #define LOG_ERROR(format, ...) _LOG(ERROR, format, ##__VA_ARGS__)
 #define LOG_FATAL(format, ...) _LOG(FATAL, format, ##__VA_ARGS__)
 
-#ifdef TINY_C_LOG_LOG_IMPL
+#ifdef TINY_C_LOG_POSIX_IMPL
 
 int log_fd = -1;
 
@@ -80,6 +80,6 @@ void DoLog(const char *format, ...) {
   write(log_fd, buffer, n);
 }
 
-#endif  // TINY_C_LOG_LOG_IMPL
+#endif  // TINY_C_LOG_POSIX_IMPL
 
-#endif  // TINY_C_LOG_LOG__
+#endif  // TINY_C_LOG_POSIX__
