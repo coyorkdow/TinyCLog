@@ -1,6 +1,7 @@
 #ifndef TINY_C_LOG_POSIX__
 #define TINY_C_LOG_POSIX__
 
+#include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/fcntl.h>
@@ -38,6 +39,8 @@ void DoLog(const char *format, ...);
 
 #ifdef TINY_C_LOG_POSIX_IMPL
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 int log_fd = -1;
 
 #ifdef USER_LOG_LEVEL
@@ -68,6 +71,7 @@ void UpdateFile(int year, int mon, int day, int hour) {
 void DoLog(const char *format, ...) {
   char buffer[BUFSIZ];
   time_t t = time(NULL);
+  pthread_mutex_lock(&mutex);
   struct tm *fulltime = localtime(&t);
   UpdateFile(fulltime->tm_year + 1900, fulltime->tm_mon + 1, fulltime->tm_mday,
              fulltime->tm_hour);
@@ -78,6 +82,7 @@ void DoLog(const char *format, ...) {
   int n = vsnprintf(buffer, BUFSIZ, format, args);
   va_end(args);
   write(log_fd, buffer, n);
+  pthread_mutex_unlock(&mutex);
 }
 
 #endif  // TINY_C_LOG_POSIX_IMPL

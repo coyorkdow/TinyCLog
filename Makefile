@@ -5,13 +5,13 @@ CC = gcc
 CFLAGS = -Wall -O2
 LOG_FLAGS = -DTINY_C_LOG_POSIX_IMPL -DUSER_LOGFILE_DIR=\"$(USER_LOGFILE_LOCATION)\" -DUSER_LOG_LEVEL=DEBUG 
 
-example: example.o log_posix.h.gch
-	$(CC) $(CFLAGS) -o example example.o log_posix.h.gch
+example: example.o multithread.o
+	$(CC) -pthread $(CFLAGS) -o example example.o multithread.o
 
 example.o: example.c
+	$(CC) $(CFLAGS) $(LOG_FLAGS) -c example.c
 
-log_posix.h.gch: log_posix.h
-	$(CC) $(CFLAGS) $(LOG_FLAGS) -c log_posix.h
+multithread: multithread.c
 
 clean:
 	rm -f *~ *.o *.gch example
