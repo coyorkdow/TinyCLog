@@ -26,17 +26,10 @@ int main(void) {
 ```
 
 ## Build
-1. Compile `log_posix.h` while the macro `TINY_C_LOG_POSIX_IMPL` is defined. `USER_LOGFILE_LOCATION` and `USER_LOG_LEVEL` are optional.
-```
-gcc -DTINY_C_LOG_POSIX_IMPL -DUSER_LOGFILE_DIR=\"example.log\" -DUSER_LOG_LEVEL=DEBUG -c log_posix.h
-```
+Since TinyCLog is header only, to avoid symbols redefined, all the definition of symbols with external linkage are wraped in `#ifdef TINY_C_LOG_POSIX_IMPL`. So you have to make sure that macro `TINY_C_LOG_POSIX_IMPL` is defined in **one and only one** compilation unit. `USER_LOGFILE_LOCATION` and `USER_LOG_LEVEL` are optional and are used to configure the location of log files and logging level.
 
-2. Compile the other source files. Make sure that `TINY_C_LOG_POSIX_IMPL` is **not defined**.
 ```
-gcc -c example.c
-```
-
-3. Link the object files that generated in step 1 and step 2, and complete your build.
-```
-gcc -o example example.o log_posix.h.gch
+gcc -DTINY_C_LOG_POSIX_IMPL -DUSER_LOGFILE_DIR=\"example.log\" -DUSER_LOG_LEVEL=DEBUG -c example.c
+gcc -c mutilthread.c
+gcc -pthread -o example example.o mutilthread.o
 ```
