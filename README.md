@@ -1,5 +1,5 @@
 # TinyCLog
-A header only C language logging library.
+TinyCLog is mini C logging library. It is header only and thread safety.
 
 ```log
 2021-07-21 21:47:18	example.c:main:4	DEBUG	this is a debug #1
@@ -10,9 +10,9 @@ A header only C language logging library.
 ```
 
 ## Usage
-Copy `log_posix.h` to your project directory.
+Copy folder `tiny_c_log` to your project directory.
 ```c
-#include "log_posix.h"
+#include "tiny_c_log/log_posix.h"
 
 int main(void) {
   LOG_DEBUG("this is a debug #%d", 1);

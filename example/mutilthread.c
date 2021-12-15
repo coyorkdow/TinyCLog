@@ -2,7 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "log_posix.h"
+#include "tiny_c_log/log_posix.h"
 #include "mutilthread.h"
 
 pthread_t threads[5];

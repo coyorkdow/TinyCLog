@@ -17,7 +17,11 @@ enum LogLevel {
   DISABLE = 100
 };
 
-extern const enum LogLevel log_level;
+#ifdef USER_LOG_LEVEL
+#define CONFIGURED_LOG_LEVEL USER_LOG_LEVEL
+#else
+#define CONFIGURED_LOG_LEVEL INFO
+#endif  // USER_LOG_LEVEL
 
 extern char formatted_time[64];
 
@@ -25,7 +29,7 @@ void DoLog(const char *format, ...);
 
 #define _LOG(level, format, ...)                                      \
   do {                                                                \
-    if (level >= log_level) {                                         \
+    if (level >= CONFIGURED_LOG_LEVEL) {                              \
       DoLog("%s\t%s:%s:%d\t" #level "\t" format "\n", formatted_time, \
             __FILE__, __func__, __LINE__, ##__VA_ARGS__);             \
     }                                                                 \
@@ -43,12 +47,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int log_fd = -1;
 
-#ifdef USER_LOG_LEVEL
-const enum LogLevel log_level = USER_LOG_LEVEL;
-#else
-const enum LogLevel log_level = INFO;
-#endif  // USER_LOG_LEVEL
-
 char formatted_time[64];
 
 long long file_suffix = 0;
@@ -59,7 +57,7 @@ void UpdateFile(int year, int mon, int day, int hour) {
   long long suffix = year * (long long)1e6 + mon * (int)1e4 + day * 100 + hour;
   if (file_suffix != suffix) {
     file_suffix = suffix;
-    buffer[snprintf(buffer, BUFSIZ, USER_LOGFILE_DIR "_%lld", suffix)] = '\0';
+    buffer[snprintf(buffer, BUFSIZ, "%lld_" USER_LOGFILE_DIR, suffix)] = '\0';
     if (log_fd != -1) close(log_fd);
     log_fd = open(buffer, O_APPEND | O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
   }
