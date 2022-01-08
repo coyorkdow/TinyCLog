@@ -62,7 +62,7 @@ void UpdateFile(int year, int mon, int day, int hour) {
     log_fd = open(buffer, O_APPEND | O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
   }
 #else
-  if (log_fs == -1) log_fd = fileno(stderr);
+  if (log_fd == -1) log_fd = fileno(stderr);
 #endif  // USER_LOGFILE_DIR
 }
 
