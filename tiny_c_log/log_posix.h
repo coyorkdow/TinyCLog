@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/fcntl.h>
 #include <time.h>
 #include <unistd.h>
@@ -66,21 +67,57 @@ void UpdateFile(int year, int mon, int day, int hour) {
 #endif  // USER_LOGFILE_DIR
 }
 
+char number_map[100][2];
+
+void InitMap() {
+  int i;
+  for (i = 0; i < 100; i++) {
+    sprintf(number_map[i], "%02d", i);
+  }
+}
+
 void DoLog(const char *format, ...) {
+  static long long last_log_sec = 0;
+  if (*(char *)number_map == '\0') {
+    InitMap();
+  }
   char buffer[BUFSIZ];
   time_t t = time(NULL);
   pthread_mutex_lock(&mutex);
-  struct tm *fulltime = localtime(&t);
-  UpdateFile(fulltime->tm_year + 1900, fulltime->tm_mon + 1, fulltime->tm_mday,
-             fulltime->tm_hour);
-  formatted_time[strftime(formatted_time, sizeof(formatted_time),
-                          "%Y-%m-%d %H:%M:%S", fulltime)] = '\0';
+  if (last_log_sec != t) {
+    last_log_sec = t;
+    struct tm *fulltime = localtime(&t);
+    int year = fulltime->tm_year + 1900;
+    int mon = fulltime->tm_mon + 1;
+    int day = fulltime->tm_mday;
+    int hour = fulltime->tm_hour;
+    UpdateFile(year, mon, day, hour);
+    int n = 0;
+    memcpy(formatted_time, number_map[year / 100], 2);
+    memcpy(formatted_time + 2, number_map[year % 100], 2);
+    formatted_time[4] = '-';
+    n += 5;
+    memcpy(formatted_time + n, number_map[mon], 2);
+    formatted_time[n + 2] = '-';
+    n += 3;
+    memcpy(formatted_time + n, number_map[day], 2);
+    formatted_time[n + 2] = ' ';
+    n += 3;
+    memcpy(formatted_time + n, number_map[hour], 2);
+    formatted_time[n + 2] = ':';
+    n += 3;
+    memcpy(formatted_time + n, number_map[fulltime->tm_min], 2);
+    formatted_time[n + 2] = ':';
+    n += 3;
+    memcpy(formatted_time + n, number_map[fulltime->tm_sec], 2);
+    formatted_time[n + 2] = '\0';
+  }
   va_list args;
   va_start(args, format);
   int n = vsnprintf(buffer, BUFSIZ, format, args);
   va_end(args);
-  write(log_fd, buffer, n);
   pthread_mutex_unlock(&mutex);
+  write(log_fd, buffer, n);
 }
 
 #endif  // TINY_C_LOG_POSIX_IMPL
