@@ -15,7 +15,7 @@ struct thread_info {
 static void *thread_start(void *arg) {
   struct thread_info *ptr = (struct thread_info *)arg;
   int cnt;
-  for (cnt = 0; cnt < 100; cnt++) {
+  for (cnt = 0; cnt < 1e5; cnt++) {
     if (strcmp(ptr->opt, "DEBUG") == 0) {
       LOG_DEBUG("thread id = %d, num = %d", ptr->id, cnt);
     } else if (strcmp(ptr->opt, "INFO") == 0) {
